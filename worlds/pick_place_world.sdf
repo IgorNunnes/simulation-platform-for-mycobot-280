@@ -1,0 +1,267 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="mycobot_pick_world">
+    <physics name="physics" type="ignored">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.95 0.95 0.95 1.0</diffuse>
+      <specular>0.3 0.3 0.3 1.0</specular>
+      <direction>-0.3 0.1 -1.0</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>5 5</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>5 5</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="workbench">
+      <static>true</static>
+      <pose>0.12 0.0 0.37 0 0 0</pose>
+      <link name="table_link">
+        <collision name="table_collision">
+          <geometry>
+            <box>
+              <size>0.90 0.70 0.04</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="table_visual">
+          <geometry>
+            <box>
+              <size>0.90 0.70 0.04</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="robot_pedestal">
+      <static>true</static>
+      <pose>-0.18 0.0 0.44 0 0 0</pose>
+      <link name="pedestal_link">
+        <collision name="pedestal_collision">
+          <geometry>
+            <box>
+              <size>0.14 0.14 0.18</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="pedestal_visual">
+          <geometry>
+            <box>
+              <size>0.14 0.14 0.18</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.92 0.92 0.92 1</ambient>
+            <diffuse>0.92 0.92 0.92 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="pick_zone">
+      <static>true</static>
+      <pose>0.10 0.0 0.391 0 0 0</pose>
+      <link name="pick_zone_link">
+        <visual name="pick_zone_visual">
+          <geometry>
+            <box>
+              <size>0.30 0.24 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.98 0.98 0.98 1</ambient>
+            <diffuse>0.98 0.98 0.98 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="place_zone">
+      <static>true</static>
+      <pose>0.34 -0.18 0.391 0 0 0</pose>
+      <link name="place_zone_link">
+        <visual name="place_zone_visual">
+          <geometry>
+            <box>
+              <size>0.18 0.18 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.96 0.96 0.96 1</ambient>
+            <diffuse>0.96 0.96 0.96 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="realsense_camera">
+      <static>true</static>
+      <pose>0.16 0.0 1.18 0 1.12 3.14159</pose>
+      <link name="camera_link">
+        <sensor name="realsense_rgbd" type="rgbd_camera">
+          <update_rate>20</update_rate>
+          <always_on>true</always_on>
+          <topic>realsense_rgbd</topic>
+          <camera>
+            <horizontal_fov>1.05</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.05</near>
+              <far>2.0</far>
+            </clip>
+          </camera>
+        </sensor>
+        <visual name="camera_body">
+          <geometry>
+            <box>
+              <size>0.08 0.025 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="red_block">
+      <pose>0.10 -0.10 0.417 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz><izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="green_block">
+      <pose>0.18 0.08 0.417 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz><izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0.1 0.7 0.2 1</ambient><diffuse>0.1 0.7 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="blue_block">
+      <pose>0.20 -0.02 0.417 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz><izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0.1 0.2 0.8 1</ambient><diffuse>0.1 0.2 0.8 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="yellow_block">
+      <pose>0.28 0.11 0.417 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz><izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0.85 0.75 0.1 1</ambient><diffuse>0.85 0.75 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="orange_block">
+      <pose>0.29 -0.12 0.417 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.02</mass>
+          <inertia>
+            <ixx>0.00001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.00001</iyy><iyz>0</iyz><izz>0.00001</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.9 0.45 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

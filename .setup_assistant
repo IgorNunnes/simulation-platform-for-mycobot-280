@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: mycobot_realsense_pick_sim
+    relative_path: config/mycobot_280_pick.urdf.xacro
+  srdf:
+    relative_path: config/mycobot_280_pick.srdf
+  package_settings:
+    author_name: Codex
+    author_email: igor@local
+    generated_timestamp: 1774481200
