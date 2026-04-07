@@ -1,0 +1,28 @@
+services:
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        ROS_DISTRO: ${ROS_DISTRO:-humble}
+        ELEPHANT_BRANCH: ${ELEPHANT_BRANCH:-humble}
+        DOCKER_USER: ${DOCKER_USER:-ros}
+        DOCKER_UID: ${DOCKER_UID:-1000}
+        DOCKER_GID: ${DOCKER_GID:-1000}
+    image: mycobot-realsense-pick-sim:${ROS_DISTRO:-humble}
+    working_dir: /workspaces/mycobot_realsense_pick_sim
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: "1"
+      XAUTHORITY: ${XAUTHORITY_CONTAINER:-/tmp/.Xauthority}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      LIBGL_ALWAYS_SOFTWARE: ${LIBGL_ALWAYS_SOFTWARE:-0}
+    volumes:
+      - ..:/workspaces/mycobot_realsense_pick_sim
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY_PATH:-/tmp/.Xauthority}:${XAUTHORITY_CONTAINER:-/tmp/.Xauthority}:ro

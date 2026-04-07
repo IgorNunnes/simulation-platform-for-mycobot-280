@@ -1,11 +1,11 @@
 gz_ros_control:
   ros__parameters:
-    hold_joints: false
-    position_proportional_gain: 1.0
+    hold_joints: true
+    position_proportional_gain: 50.0
 
 controller_manager:
   ros__parameters:
-    update_rate: 100
+    update_rate: 400
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster

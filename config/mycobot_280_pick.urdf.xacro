@@ -2,8 +2,11 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mycobot_280_pick">
   <xacro:arg name="controllers_file" default="$(find mycobot_realsense_pick_sim)/config/ros2_controllers.yaml"/>
   <xacro:arg name="initial_positions_file" default="$(find mycobot_realsense_pick_sim)/config/initial_positions.yaml"/>
+  <xacro:property name="initial_positions_file_path" value="$(arg initial_positions_file)"/>
+  <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file_path)['initial_positions']}"/>
 
-  <xacro:include filename="$(find mycobot_description)/urdf/mycobot_280_m5/mycobot_280_m5_adaptive_gripper.urdf"/>
+  <xacro:include filename="$(find mycobot_realsense_pick_sim)/config/mycobot_280_m5_adaptive_gripper_sim.urdf.xacro"/>
+  <xacro:mycobot_280_adaptive_gripper_sim_model/>
 
   <link name="world"/>
   <joint name="world_to_g_base" type="fixed">
@@ -24,49 +27,49 @@
     <joint name="joint2_to_joint1">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint2_to_joint1']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="joint3_to_joint2">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint3_to_joint2']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="joint4_to_joint3">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint4_to_joint3']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="joint5_to_joint4">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint5_to_joint4']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="joint6_to_joint5">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint6_to_joint5']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="joint6output_to_joint6">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['joint6output_to_joint6']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="gripper_controller">
       <command_interface name="position"/>
       <state_interface name="position">
-        <param name="initial_value">0.0</param>
+        <param name="initial_value">${initial_positions['gripper_controller']}</param>
       </state_interface>
       <state_interface name="velocity"/>
     </joint>

@@ -1,0 +1,12 @@
+.git
+.setup_assistant
+build
+install
+log
+__pycache__
+launch/__pycache__
+mycobot_realsense_pick_sim/__pycache__
+*.pyc
+*.pyo
+*.swp
+*.swo

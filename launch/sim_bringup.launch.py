@@ -1,4 +1,5 @@
 import os
+import yaml
 
 import xacro
 from ament_index_python.packages import PackageNotFoundError, get_package_share_directory
@@ -14,8 +15,11 @@ def generate_launch_description():
     pkg_share = get_package_share_directory("mycobot_realsense_pick_sim")
     mycobot_share = get_package_share_directory("mycobot_description")
     controllers_file = os.path.join(pkg_share, "config", "ros2_controllers.yaml")
+    initial_positions_file = os.path.join(pkg_share, "config", "initial_positions.yaml")
     urdf_path = os.path.join(pkg_share, "config", "mycobot_280_pick.urdf.xacro")
     robot_description = {"robot_description": xacro.process_file(urdf_path).toxml()}
+    with open(initial_positions_file, "r", encoding="utf-8") as stream:
+        initial_positions = yaml.safe_load(stream)["initial_positions"]
     resource_entries = [
         mycobot_share,
         os.path.dirname(mycobot_share),
@@ -103,7 +107,7 @@ def generate_launch_description():
     )
 
     joint_state_broadcaster = TimerAction(
-        period=6.0,
+        period=0.2,
         actions=[
             Node(
                 package="controller_manager",
@@ -121,7 +125,7 @@ def generate_launch_description():
     )
 
     arm_controller = TimerAction(
-        period=7.0,
+        period=0.4,
         actions=[
             Node(
                 package="controller_manager",
@@ -139,7 +143,7 @@ def generate_launch_description():
     )
 
     gripper_controller = TimerAction(
-        period=8.0,
+        period=0.6,
         actions=[
             Node(
                 package="controller_manager",
@@ -152,6 +156,30 @@ def generate_launch_description():
                     controllers_file,
                 ],
                 output="screen",
+            )
+        ],
+    )
+
+    startup_hold = TimerAction(
+        period=0.8,
+        actions=[
+            Node(
+                package="mycobot_realsense_pick_sim",
+                executable="startup_hold_commander",
+                output="screen",
+                parameters=[
+                    {
+                        "arm_positions": [
+                            float(initial_positions["joint2_to_joint1"]),
+                            float(initial_positions["joint3_to_joint2"]),
+                            float(initial_positions["joint4_to_joint3"]),
+                            float(initial_positions["joint5_to_joint4"]),
+                            float(initial_positions["joint6_to_joint5"]),
+                            float(initial_positions["joint6output_to_joint6"]),
+                        ],
+                        "gripper_positions": [float(initial_positions["gripper_controller"])],
+                    }
+                ],
             )
         ],
     )
@@ -196,6 +224,7 @@ def generate_launch_description():
             joint_state_broadcaster,
             arm_controller,
             gripper_controller,
+            startup_hold,
             rviz,
         ]
     actions.extend(image_view_action)

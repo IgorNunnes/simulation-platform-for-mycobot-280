@@ -17,6 +17,7 @@
   <depend>gz_ros2_control</depend>
   <depend>image_geometry</depend>
   <depend>image_view</depend>
+  <depend>joint_state_publisher_gui</depend>
   <depend>joint_state_broadcaster</depend>
   <depend>joint_trajectory_controller</depend>
   <depend>launch</depend>
@@ -24,13 +25,16 @@
   <depend>moveit_configs_utils</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_ros_move_group</depend>
+  <depend>mycobot_280</depend>
   <depend>mycobot_description</depend>
   <depend>nav_msgs</depend>
   <depend>rclpy</depend>
   <depend>robot_state_publisher</depend>
   <depend>ros_gz_bridge</depend>
   <depend>ros_gz_interfaces</depend>
+  <depend>rosgraph_msgs</depend>
   <depend>ros_gz_sim</depend>
+  <depend>rviz2</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>std_msgs</depend>
@@ -41,6 +45,7 @@
   <depend>visualization_msgs</depend>
   <depend>xacro</depend>
 
+  <exec_depend>ament_index_python</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
 
