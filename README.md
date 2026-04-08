@@ -237,6 +237,12 @@ Inside the container, the ROS environment is sourced automatically by `docker/en
 ./run.sh slider
 ```
 
+### 8. Launch topic-based joint control
+
+```bash
+./run.sh joint-topic
+```
+
 ## Helper Script Reference
 
 The repository ships with `run.sh` to keep the workflow simple.
@@ -249,6 +255,7 @@ Available commands:
 ./run.sh shell
 ./run.sh sim-world
 ./run.sh sim-bringup rviz:=false
+./run.sh joint-topic
 ./run.sh topic-pose
 ./run.sh pick-place
 ./run.sh slider
@@ -261,9 +268,155 @@ What each command does:
 - `shell`: opens an interactive shell in the configured container
 - `sim-world`: launches the simulation world only
 - `sim-bringup`: launches the main robot + camera + bridge + controller stack
+- `joint-topic`: launches the joint-topic command workflow
 - `topic-pose`: launches the pose-command workflow
 - `pick-place`: launches the perception + manipulation flow
 - `slider`: launches the slider control workflow
+
+## Recommended Day-To-Day Workflow
+
+If you are working on the project regularly, this is the simplest sequence to follow.
+
+### 1. Rebuild after code changes
+
+```bash
+./run.sh build-ws
+```
+
+### 2. Start the main simulation stack
+
+```bash
+./run.sh sim-bringup rviz:=false
+```
+
+Use this when you want to confirm that:
+
+- Gazebo opens correctly
+- the robot spawns
+- controllers are available
+- the camera is publishing
+
+### 3. Choose one control mode
+
+Use `joint-topic` when you want direct joint-level commands:
+
+```bash
+./run.sh joint-topic
+```
+
+Use `topic-pose` when you want Cartesian goals through MoveIt:
+
+```bash
+./run.sh topic-pose
+```
+
+Use `slider` when you want an interactive GUI for manual driving:
+
+```bash
+./run.sh slider
+```
+
+Use `pick-place` when you want the perception and manipulation pipeline:
+
+```bash
+./run.sh pick-place
+```
+
+## What Each Launch Is For
+
+### `sim-world`
+
+Use this only when you want to inspect the environment itself. It does not bring up the full robot control stack.
+
+### `sim-bringup`
+
+Use this as the base runtime for almost everything. It launches:
+
+- Gazebo
+- the robot
+- ros_gz bridges
+- robot state publisher
+- camera topic relay
+- controllers
+
+### `joint-topic`
+
+Use this for repeatable scripts, quick tests, homing, and low-level manual commands in joint space.
+
+### `topic-pose`
+
+Use this when you want to publish end-effector goals in Cartesian space and let MoveIt solve IK and execute trajectories.
+
+### `slider`
+
+Use this for interactive manual testing with a visible slider GUI.
+
+### `pick-place`
+
+Use this when you want to test the higher-level perception-to-manipulation pipeline.
+
+## Step-By-Step Bringup Examples
+
+### Example A: Verify the environment is working
+
+1. Build the workspace.
+
+```bash
+./run.sh build-ws
+```
+
+2. Launch the main simulation.
+
+```bash
+./run.sh sim-bringup rviz:=false
+```
+
+3. In another terminal, check the main topics.
+
+```bash
+ros2 topic list | grep camera
+ros2 topic echo --once /joint_states
+```
+
+### Example B: Drive the robot with joint commands
+
+1. Launch the joint-topic workflow.
+
+```bash
+./run.sh joint-topic
+```
+
+2. Send the robot to a test pose.
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, -0.6, 0.9, -0.3, 0.2, 0.0]}"
+```
+
+3. Return to the neutral pose.
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
+```
+
+### Example C: Drive the robot with Cartesian pose commands
+
+1. Launch the pose-topic workflow.
+
+```bash
+./run.sh topic-pose
+```
+
+2. Publish a test Cartesian goal.
+
+```bash
+ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {frame_id: 'world'}, pose: {position: {x: 0.18, y: 0.00, z: 0.62}, orientation: {x: 1.0, y: 0.0, z: 0.0, w: 0.0}}}"
+```
+
+3. Publish a second goal to move elsewhere in the workspace.
+
+```bash
+ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {frame_id: 'world'}, pose: {position: {x: 0.20, y: -0.08, z: 0.58}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 0.0}}}"
+```
 
 ## Running Without Docker
 
