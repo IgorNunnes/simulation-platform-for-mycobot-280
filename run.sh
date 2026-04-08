@@ -57,20 +57,12 @@ Uso:
   ./run.sh build-image
   ./run.sh build-ws
   ./run.sh shell
-  ./run.sh sim-world [args...]
-  ./run.sh sim-bringup [args...]
   ./run.sh joint-topic [args...]
-  ./run.sh topic-pose [args...]
-  ./run.sh pick-place [args...]
-  ./run.sh slider [args...]
 
 Exemplos:
   ./run.sh build-image
   ./run.sh build-ws
-  ./run.sh sim-world
-  ./run.sh sim-bringup rviz:=false
   ./run.sh joint-topic
-  ./run.sh topic-pose
 EOF
 }
 
@@ -89,29 +81,9 @@ case "${cmd}" in
     ensure_xhost
     run_container bash
     ;;
-  sim-world)
-    ensure_xhost
-    run_launch sim_world.launch.py "$@"
-    ;;
-  sim-bringup)
-    ensure_xhost
-    run_launch sim_bringup.launch.py "$@"
-    ;;
   joint-topic)
     ensure_xhost
     run_launch topic_joint_control.launch.py "$@"
-    ;;
-  topic-pose)
-    ensure_xhost
-    run_launch topic_pose_control.launch.py "$@"
-    ;;
-  pick-place)
-    ensure_xhost
-    run_launch pick_place.launch.py "$@"
-    ;;
-  slider)
-    ensure_xhost
-    run_launch slider_control_sim.launch.py "$@"
     ;;
   help|-h|--help)
     usage

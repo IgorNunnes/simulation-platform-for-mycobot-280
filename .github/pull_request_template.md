@@ -35,11 +35,9 @@ Group the changes by area and explain the practical effect of each one.
 
 ## Control and Teleoperation
 
-- 
-
-## Perception and Planning
-
-- 
+- the branch is centered on the topic-based joint workflow because it is the currently reliable control path
+- `topic_joint_control.launch.py` is the main supported launcher for simulation plus arm actuation
+- obsolete launch entry points were removed so the public workflow surface matches what is currently supported
 
 ## Documentation and Developer Workflow
 
@@ -90,10 +88,10 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-## 3. Start the Main Simulation
+## 3. Start the Supported Workflow
 
 ```bash
-ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
 Expected result:
@@ -102,6 +100,7 @@ Expected result:
 - the robot spawns
 - the camera topics are available
 - ros2_control controllers are active
+- the topic joint commander is available
 
 ## 4. Validate Manual ROS 2 Usage Inside the Container
 
@@ -167,31 +166,6 @@ Important:
 - the `ros2 topic pub` commands above should be executed from a terminal that is already inside the container
 - for each new terminal, run `docker compose -f docker/docker-compose.yml run --rm sim bash` and `source install/setup.bash` before publishing commands
 
-## 6. Validate Cartesian Pose Control
-
-Start the pose-topic workflow:
-
-```bash
-ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py
-```
-
-Send a Cartesian goal:
-
-```bash
-ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {frame_id: 'world'}, pose: {position: {x: 0.18, y: 0.00, z: 0.62}, orientation: {x: 1.0, y: 0.0, z: 0.0, w: 0.0}}}"
-```
-
-## 7. Validate Slider Control
-
-```bash
-ros2 launch mycobot_realsense_pick_sim slider_control_sim.launch.py
-```
-
-Expected result:
-
-- the slider GUI opens
-- slider changes trigger trajectory execution
-
 # Validation Checklist
 
 Keep this checklist updated as the branch grows.
@@ -203,9 +177,6 @@ Keep this checklist updated as the branch grows.
 - [ ] Camera topics are available
 - [ ] Manual `ros2 launch` / `ros2 run` / `ros2 topic` workflows work inside the container
 - [ ] Joint topic control works
-- [ ] Pose topic control works
-- [ ] Slider control works
-- [ ] Pick-and-place flow still works
 - [ ] `MANUAL_FOR_USE.md` reflects the latest workflow
 - [ ] `README.md` remains focused on host requirements and Docker bringup
 

@@ -14,10 +14,7 @@ Use that document for:
 
 - step-by-step environment bringup
 - how to use standard `ros2 launch`, `ros2 run`, and `ros2 topic` commands inside the container
-- explanation of what each launch does
 - joint-space control
-- Cartesian pose control
-- slider control
 - troubleshooting and workflow examples
 
 ## Recommended Host Setup
@@ -122,8 +119,8 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-Then launch the main simulation:
+Then launch the working joint-control workflow:
 
 ```bash
-ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
