@@ -1,11 +1,11 @@
 gz_ros_control:
   ros__parameters:
     hold_joints: true
-    position_proportional_gain: 50.0
+    position_proportional_gain: 0.5
 
 controller_manager:
   ros__parameters:
-    update_rate: 400
+    update_rate: 100
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -29,8 +29,10 @@ arm_controller:
       - position
     state_interfaces:
       - position
-      - velocity
     allow_partial_joints_goal: false
+    open_loop_control: false
+    allow_integration_in_goal_trajectories: true
+    allow_nonzero_velocity_at_trajectory_end: true
 
 gripper_trajectory_controller:
   ros__parameters:
@@ -40,5 +42,4 @@ gripper_trajectory_controller:
       - position
     state_interfaces:
       - position
-      - velocity
     allow_partial_joints_goal: false
