@@ -186,6 +186,17 @@ Use this launch when:
 - you want the camera topics to be present
 - you want the simplest reproducible workflow in this branch
 
+After launching, wait until the startup sequence finishes before sending the first motion command.
+
+The most useful signs in the launch terminal are:
+
+- `Configured and activated arm_controller`
+- `Configured and activated gripper_trajectory_controller`
+- `Listening for joint goals on /arm_joint_goal`
+- `Sent startup hold trajectory to arm and gripper`
+
+If you publish a joint goal too early, the startup sequence may still be activating controllers or sending the initial hold command.
+
 ### 4.4 Open More Than One Terminal
 
 For most ROS 2 workflows, you should use more than one terminal.
@@ -341,7 +352,9 @@ source install/setup.bash
 ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
-4. In another terminal, inspect the main topics.
+4. Wait until the launch terminal shows that the controllers are activated and the startup hold has been sent.
+
+5. In another terminal, inspect the main topics.
 
 ```bash
 docker compose -f docker/docker-compose.yml run --rm sim bash
@@ -359,13 +372,22 @@ ros2 topic echo --once /joint_states
 ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
-2. Send a test arm configuration.
+2. Wait until the launch terminal shows:
+
+```text
+Configured and activated arm_controller
+Configured and activated gripper_trajectory_controller
+Listening for joint goals on /arm_joint_goal
+Sent startup hold trajectory to arm and gripper
+```
+
+3. Send a test arm configuration.
 
 ```bash
 ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, -0.6, 0.9, -0.3, 0.2, 0.0]}"
 ```
 
-3. Return to the neutral home pose.
+4. Return to the neutral home pose.
 
 ```bash
 ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"

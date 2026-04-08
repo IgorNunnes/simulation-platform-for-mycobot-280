@@ -38,6 +38,7 @@ Group the changes by area and explain the practical effect of each one.
 - the branch is centered on the topic-based joint workflow because it is the currently reliable control path
 - `topic_joint_control.launch.py` is the main supported launcher for simulation plus arm actuation
 - obsolete launch entry points were removed so the public workflow surface matches what is currently supported
+- controller bringup is now sequenced so the arm and gripper controllers activate in order before the topic commander is exposed for use
 
 ## Documentation and Developer Workflow
 
@@ -101,6 +102,7 @@ Expected result:
 - the camera topics are available
 - ros2_control controllers are active
 - the topic joint commander is available
+- the startup hold command is sent only after the controllers are active
 
 ## 4. Validate Manual ROS 2 Usage Inside the Container
 
@@ -147,6 +149,15 @@ Start the joint-topic workflow:
 
 ```bash
 ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
+```
+
+Wait for the launch terminal to show:
+
+```text
+Configured and activated arm_controller
+Configured and activated gripper_trajectory_controller
+Listening for joint goals on /arm_joint_goal
+Sent startup hold trajectory to arm and gripper
 ```
 
 Send a test arm configuration:

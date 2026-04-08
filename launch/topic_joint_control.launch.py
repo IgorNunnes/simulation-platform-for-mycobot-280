@@ -4,8 +4,9 @@ import yaml
 import xacro
 from ament_index_python.packages import PackageNotFoundError, get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable, TimerAction
 from launch.conditions import IfCondition
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -109,81 +110,61 @@ def generate_launch_description():
         arguments=["0", "0", "0", "-1.5708", "0", "-1.5708", "camera_link", "camera_depth_optical_frame"],
     )
 
-    joint_state_broadcaster = TimerAction(
-        period=0.2,
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=[
-                    "joint_state_broadcaster",
-                    "--controller-manager",
-                    "/controller_manager",
-                    "--param-file",
-                    controllers_file,
-                ],
-                output="screen",
-            )
+    joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+            "--param-file",
+            controllers_file,
         ],
+        output="screen",
     )
 
-    arm_controller = TimerAction(
-        period=0.4,
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=[
-                    "arm_controller",
-                    "--controller-manager",
-                    "/controller_manager",
-                    "--param-file",
-                    controllers_file,
-                ],
-                output="screen",
-            )
+    arm_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "arm_controller",
+            "--controller-manager",
+            "/controller_manager",
+            "--param-file",
+            controllers_file,
         ],
+        output="screen",
     )
 
-    gripper_controller = TimerAction(
-        period=0.6,
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=[
-                    "gripper_trajectory_controller",
-                    "--controller-manager",
-                    "/controller_manager",
-                    "--param-file",
-                    controllers_file,
-                ],
-                output="screen",
-            )
+    gripper_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "gripper_trajectory_controller",
+            "--controller-manager",
+            "/controller_manager",
+            "--param-file",
+            controllers_file,
         ],
+        output="screen",
     )
 
-    startup_hold = TimerAction(
-        period=0.8,
-        actions=[
-            Node(
-                package="mycobot_realsense_pick_sim",
-                executable="startup_hold_commander",
-                output="screen",
-                parameters=[
-                    {
-                        "arm_positions": [
-                            float(initial_positions["joint2_to_joint1"]),
-                            float(initial_positions["joint3_to_joint2"]),
-                            float(initial_positions["joint4_to_joint3"]),
-                            float(initial_positions["joint5_to_joint4"]),
-                            float(initial_positions["joint6_to_joint5"]),
-                            float(initial_positions["joint6output_to_joint6"]),
-                        ],
-                        "gripper_positions": [float(initial_positions["gripper_controller"])],
-                    }
+    startup_hold = Node(
+        package="mycobot_realsense_pick_sim",
+        executable="startup_hold_commander",
+        output="screen",
+        parameters=[
+            {
+                "arm_positions": [
+                    float(initial_positions["joint2_to_joint1"]),
+                    float(initial_positions["joint3_to_joint2"]),
+                    float(initial_positions["joint4_to_joint3"]),
+                    float(initial_positions["joint5_to_joint4"]),
+                    float(initial_positions["joint6_to_joint5"]),
+                    float(initial_positions["joint6output_to_joint6"]),
                 ],
-            )
+                "gripper_positions": [float(initial_positions["gripper_controller"])],
+            }
         ],
     )
 
@@ -216,6 +197,37 @@ def generate_launch_description():
         output="screen",
     )
 
+    start_joint_state_broadcaster = RegisterEventHandler(
+        OnProcessExit(
+            target_action=spawn_robot,
+            on_exit=[TimerAction(period=0.5, actions=[joint_state_broadcaster])],
+        )
+    )
+
+    start_arm_controller = RegisterEventHandler(
+        OnProcessExit(
+            target_action=joint_state_broadcaster,
+            on_exit=[TimerAction(period=0.2, actions=[arm_controller])],
+        )
+    )
+
+    start_gripper_controller = RegisterEventHandler(
+        OnProcessExit(
+            target_action=arm_controller,
+            on_exit=[TimerAction(period=0.2, actions=[gripper_controller])],
+        )
+    )
+
+    start_runtime_nodes = RegisterEventHandler(
+        OnProcessExit(
+            target_action=gripper_controller,
+            on_exit=[
+                TimerAction(period=0.2, actions=[startup_hold]),
+                TimerAction(period=0.2, actions=[commander]),
+            ],
+        )
+    )
+
     actions = [
         DeclareLaunchArgument("world", default_value=world_path),
         DeclareLaunchArgument("rviz", default_value="false"),
@@ -231,12 +243,11 @@ def generate_launch_description():
         camera_mount_tf,
         color_optical_tf,
         depth_optical_tf,
-        joint_state_broadcaster,
-        arm_controller,
-        gripper_controller,
-        startup_hold,
+        start_joint_state_broadcaster,
+        start_arm_controller,
+        start_gripper_controller,
+        start_runtime_nodes,
         rviz,
-        commander,
     ]
     actions.extend(image_view_action)
     return LaunchDescription(actions)
