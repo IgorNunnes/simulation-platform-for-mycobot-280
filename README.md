@@ -13,6 +13,7 @@ The detailed guided manual for reproducing the environment and using each workfl
 Use that document for:
 
 - step-by-step environment bringup
+- how to use standard `ros2 launch`, `ros2 run`, and `ros2 topic` commands inside the container
 - explanation of what each launch does
 - joint-space control
 - Cartesian pose control
