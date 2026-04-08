@@ -181,7 +181,7 @@ Important:
 
 Keep this checklist updated as the branch grows.
 
-- [x] Docker image builds successfully
+- [ ] Docker image builds successfully
 - [ ] Workspace builds successfully with `colcon build --symlink-install`
 - [ ] Gazebo world launches
 - [ ] Robot spawns correctly
