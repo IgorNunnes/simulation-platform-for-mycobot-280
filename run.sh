@@ -59,6 +59,7 @@ Uso:
   ./run.sh shell
   ./run.sh sim-world [args...]
   ./run.sh sim-bringup [args...]
+  ./run.sh joint-topic [args...]
   ./run.sh topic-pose [args...]
   ./run.sh pick-place [args...]
   ./run.sh slider [args...]
@@ -68,6 +69,7 @@ Exemplos:
   ./run.sh build-ws
   ./run.sh sim-world
   ./run.sh sim-bringup rviz:=false
+  ./run.sh joint-topic
   ./run.sh topic-pose
 EOF
 }
@@ -94,6 +96,10 @@ case "${cmd}" in
   sim-bringup)
     ensure_xhost
     run_launch sim_bringup.launch.py "$@"
+    ;;
+  joint-topic)
+    ensure_xhost
+    run_launch topic_joint_control.launch.py "$@"
     ;;
   topic-pose)
     ensure_xhost

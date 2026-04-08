@@ -8,7 +8,7 @@ from moveit_msgs.srv import GetPositionIK
 from rclpy.action import ActionClient
 from rclpy.duration import Duration
 from rclpy.node import Node
-from rclpy.qos import QoSProfile
+from rclpy.qos import QoSProfile, QoSPresetProfiles
 from sensor_msgs.msg import JointState
 
 
@@ -36,13 +36,14 @@ class TopicPoseCommander(Node):
         self.declare_parameter("max_acceleration_scaling", 0.3)
         self.declare_parameter("allowed_planning_time", 5.0)
 
-        qos = QoSProfile(depth=10)
-        self.create_subscription(JointState, "/joint_states", self._on_joint_state, qos)
+        state_qos = QoSPresetProfiles.SENSOR_DATA.value
+        command_qos = QoSProfile(depth=10)
+        self.create_subscription(JointState, "/joint_states", self._on_joint_state, state_qos)
         self.create_subscription(
             PoseStamped,
             self.get_parameter("pose_topic").value,
             self._on_pose_goal,
-            qos,
+            command_qos,
         )
 
         self.move_group_client = ActionClient(self, MoveGroup, "/move_action")
@@ -148,13 +149,13 @@ class TopicPoseCommander(Node):
         if self.executing:
             self.get_logger().warn("Ignoring pose goal because another goal is executing")
             return
-        if not all(name in self.current_joint_state for name in ARM_JOINTS):
-            self.get_logger().warn("Joint state is not ready yet")
-            return
-
         goal = self._normalize_goal(msg)
         self.executing = True
         try:
+            if not all(name in self.current_joint_state for name in ARM_JOINTS):
+                self.get_logger().warn(
+                    "Joint state not fully received yet; using zero defaults as IK seed"
+                )
             ik_solution = self._compute_ik(goal)
             if ik_solution is None:
                 self.get_logger().warn("Failed to compute IK for requested pose")

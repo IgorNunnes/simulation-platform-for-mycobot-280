@@ -348,6 +348,12 @@ Pose-topic control:
 ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py
 ```
 
+Joint-topic control:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
+```
+
 ## Pose Control Usage
 
 The `topic_pose_commander` node subscribes to `geometry_msgs/msg/PoseStamped` on `/arm_goal_pose` and uses IK plus MoveIt 2 to move the end-effector to the requested pose.
@@ -369,6 +375,48 @@ If you want to send a pose without manually setting orientation, publish a zero 
 ```bash
 ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {frame_id: 'world'}, pose: {position: {x: 0.20, y: -0.08, z: 0.58}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 0.0}}}"
 ```
+
+## Joint Control Usage
+
+The `topic_joint_commander` node subscribes to `sensor_msgs/msg/JointState` on `/arm_joint_goal` and sends the requested target positions directly to the trajectory controllers. You can command all arm joints at once or publish only a subset and the node will keep the current positions for the others.
+
+Start the environment:
+
+```bash
+./run.sh joint-topic
+```
+
+Send a full arm goal:
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, -0.6, 0.9, -0.3, 0.2, 0.0]}"
+```
+
+Send a partial update for only one joint:
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint3_to_joint2'], position: [-0.9]}"
+```
+
+Return the arm to the neutral home pose:
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
+```
+
+Move the gripper through the same topic:
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['gripper_controller'], position: [-0.4]}"
+```
+
+You can also command arm and gripper together:
+
+```bash
+ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6', 'gripper_controller'], position: [0.2, -0.8, 1.0, -0.4, 0.1, 0.0, -0.35]}"
+```
+
+If you publish a new joint goal while the previous one is still executing, the node keeps the latest goal queued and runs it next. This makes it easier to drive the arm interactively without restarting the controller node.
 
 ## Slider Control Usage
 

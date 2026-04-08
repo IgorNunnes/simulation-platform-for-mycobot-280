@@ -31,6 +31,7 @@ setup(
             "realsense_topic_relay = mycobot_realsense_pick_sim.realsense_topic_relay:main",
             "object_detector = mycobot_realsense_pick_sim.object_detector:main",
             "pick_place_executor = mycobot_realsense_pick_sim.pick_place_executor:main",
+            "topic_joint_commander = mycobot_realsense_pick_sim.topic_joint_commander:main",
             "topic_pose_commander = mycobot_realsense_pick_sim.topic_pose_commander:main",
             "startup_hold_commander = mycobot_realsense_pick_sim.startup_hold_commander:main",
         ],
