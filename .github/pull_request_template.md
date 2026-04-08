@@ -43,7 +43,10 @@ Group the changes by area and explain the practical effect of each one.
 
 ## Documentation and Developer Workflow
 
-- 
+- README remains focused on Ubuntu host requirements, Docker setup, and first bringup
+- `MANUAL_FOR_USE.md` includes a dedicated section for running standard `ros2` commands inside the container
+- the manual now explains when to use `./run.sh` versus raw `ros2 launch`, `ros2 run`, and `ros2 topic`
+- the manual makes it explicit that each terminal used for manual ROS 2 commands should start from `./run.sh shell` and `source install/setup.bash`
 
 # How To Reproduce the Current Branch
 
@@ -83,7 +86,46 @@ Expected result:
 - the camera topics are available
 - ros2_control controllers are active
 
-## 4. Validate Joint-Space Control
+## 4. Validate Manual ROS 2 Usage Inside the Container
+
+Open a shell inside the container:
+
+```bash
+./run.sh shell
+```
+
+Inside the container:
+
+```bash
+cd /workspaces/mycobot_realsense_pick_sim
+source install/setup.bash
+```
+
+Launch the joint-topic workflow manually with `ros2 launch`:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
+```
+
+In a second terminal, enter the container again and source the workspace:
+
+```bash
+./run.sh shell
+cd /workspaces/mycobot_realsense_pick_sim
+source install/setup.bash
+```
+
+Inspect the ROS graph:
+
+```bash
+ros2 node list
+ros2 topic list
+ros2 action list
+```
+
+This validates that the branch supports both helper-script workflows and standard ROS 2 commands inside the Docker environment.
+
+## 5. Validate Joint-Space Control
 
 Start the joint-topic workflow:
 
@@ -103,7 +145,12 @@ Return to home:
 ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint2_to_joint1', 'joint3_to_joint2', 'joint4_to_joint3', 'joint5_to_joint4', 'joint6_to_joint5', 'joint6output_to_joint6'], position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
 ```
 
-## 5. Validate Cartesian Pose Control
+Important:
+
+- the `ros2 topic pub` commands above should be executed from a terminal that is already inside the container
+- for each new terminal, run `./run.sh shell` and `source install/setup.bash` before publishing commands
+
+## 6. Validate Cartesian Pose Control
 
 Start the pose-topic workflow:
 
@@ -117,7 +164,7 @@ Send a Cartesian goal:
 ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {frame_id: 'world'}, pose: {position: {x: 0.18, y: 0.00, z: 0.62}, orientation: {x: 1.0, y: 0.0, z: 0.0, w: 0.0}}}"
 ```
 
-## 6. Validate Slider Control
+## 7. Validate Slider Control
 
 ```bash
 ./run.sh slider
@@ -137,6 +184,7 @@ Keep this checklist updated as the branch grows.
 - [ ] Gazebo world launches
 - [ ] Robot spawns correctly
 - [ ] Camera topics are available
+- [ ] Manual `ros2 launch` / `ros2 run` / `ros2 topic` workflows work inside the container
 - [ ] Joint topic control works
 - [ ] Pose topic control works
 - [ ] Slider control works
