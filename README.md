@@ -89,26 +89,41 @@ Allow local Docker containers to use your X server:
 xhost +local:docker
 ```
 
+Export the Docker variables used by the compose file:
+
+```bash
+export DOCKER_UID="$(id -u)"
+export DOCKER_GID="$(id -g)"
+export DOCKER_USER="${USER}"
+export ROS_DISTRO=humble
+export ELEPHANT_BRANCH=humble
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY_PATH="${XAUTHORITY:-$HOME/.Xauthority}"
+export XAUTHORITY_CONTAINER=/tmp/.Xauthority
+```
+
 Build the Docker image:
 
 ```bash
-./run.sh build-image
+docker compose -f docker/docker-compose.yml build
 ```
 
-Build the ROS 2 workspace inside the container:
+Open a shell inside the container:
 
 ```bash
-./run.sh build-ws
+docker compose -f docker/docker-compose.yml run --rm sim bash
 ```
 
-Start the main simulation stack:
+Inside the container, build the workspace:
 
 ```bash
-./run.sh sim-bringup rviz:=false
+cd /workspaces/mycobot_realsense_pick_sim
+colcon build --symlink-install
+source install/setup.bash
 ```
 
-If you want a shell inside the container:
+Then launch the main simulation:
 
 ```bash
-./run.sh shell
+ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
 ```

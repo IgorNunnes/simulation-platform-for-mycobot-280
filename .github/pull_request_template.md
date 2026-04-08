@@ -45,8 +45,9 @@ Group the changes by area and explain the practical effect of each one.
 
 - README remains focused on Ubuntu host requirements, Docker setup, and first bringup
 - `MANUAL_FOR_USE.md` includes a dedicated section for running standard `ros2` commands inside the container
-- the manual now explains when to use `./run.sh` versus raw `ros2 launch`, `ros2 run`, and `ros2 topic`
-- the manual makes it explicit that each terminal used for manual ROS 2 commands should start from `./run.sh shell` and `source install/setup.bash`
+- the manual now treats Docker plus raw `ros2 launch`, `ros2 run`, and `ros2 topic` as the canonical workflow
+- the manual makes it explicit that each terminal used for ROS 2 commands should start from `docker compose -f docker/docker-compose.yml run --rm sim bash` and `source install/setup.bash`
+- new workflow documentation should prefer Docker and ROS 2 commands directly instead of adding new `run.sh` wrappers
 
 # How To Reproduce the Current Branch
 
@@ -69,14 +70,30 @@ docker compose version
 git clone -b humble https://github.com/IgorNunnes/simulation-platform-for-mycobot-280.git
 cd simulation-platform-for-mycobot-280
 xhost +local:docker
-./run.sh build-image
-./run.sh build-ws
+export DOCKER_UID="$(id -u)"
+export DOCKER_GID="$(id -g)"
+export DOCKER_USER="${USER}"
+export ROS_DISTRO=humble
+export ELEPHANT_BRANCH=humble
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY_PATH="${XAUTHORITY:-$HOME/.Xauthority}"
+export XAUTHORITY_CONTAINER=/tmp/.Xauthority
+docker compose -f docker/docker-compose.yml build
+docker compose -f docker/docker-compose.yml run --rm sim bash
+```
+
+Inside the container:
+
+```bash
+cd /workspaces/mycobot_realsense_pick_sim
+colcon build --symlink-install
+source install/setup.bash
 ```
 
 ## 3. Start the Main Simulation
 
 ```bash
-./run.sh sim-bringup rviz:=false
+ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
 ```
 
 Expected result:
@@ -91,7 +108,7 @@ Expected result:
 Open a shell inside the container:
 
 ```bash
-./run.sh shell
+docker compose -f docker/docker-compose.yml run --rm sim bash
 ```
 
 Inside the container:
@@ -110,7 +127,7 @@ ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 In a second terminal, enter the container again and source the workspace:
 
 ```bash
-./run.sh shell
+docker compose -f docker/docker-compose.yml run --rm sim bash
 cd /workspaces/mycobot_realsense_pick_sim
 source install/setup.bash
 ```
@@ -123,14 +140,14 @@ ros2 topic list
 ros2 action list
 ```
 
-This validates that the branch supports both helper-script workflows and standard ROS 2 commands inside the Docker environment.
+This validates that the branch supports the Docker-based shell workflow with standard ROS 2 commands inside the container.
 
 ## 5. Validate Joint-Space Control
 
 Start the joint-topic workflow:
 
 ```bash
-./run.sh joint-topic
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
 Send a test arm configuration:
@@ -148,14 +165,14 @@ ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint
 Important:
 
 - the `ros2 topic pub` commands above should be executed from a terminal that is already inside the container
-- for each new terminal, run `./run.sh shell` and `source install/setup.bash` before publishing commands
+- for each new terminal, run `docker compose -f docker/docker-compose.yml run --rm sim bash` and `source install/setup.bash` before publishing commands
 
 ## 6. Validate Cartesian Pose Control
 
 Start the pose-topic workflow:
 
 ```bash
-./run.sh topic-pose
+ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py
 ```
 
 Send a Cartesian goal:
@@ -167,7 +184,7 @@ ros2 topic pub --once /arm_goal_pose geometry_msgs/msg/PoseStamped "{header: {fr
 ## 7. Validate Slider Control
 
 ```bash
-./run.sh slider
+ros2 launch mycobot_realsense_pick_sim slider_control_sim.launch.py
 ```
 
 Expected result:

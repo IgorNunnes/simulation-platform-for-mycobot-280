@@ -30,32 +30,72 @@ The recommended way to use the project is with Docker.
 
 ## 2. Recommended Workflow
 
-The simplest day-to-day workflow is:
+The canonical day-to-day workflow is:
 
-1. Build the workspace after changes.
-2. Launch the main simulation stack.
-3. Choose the control mode you want to use.
-4. Validate that controllers, robot state, and camera topics are alive.
+1. Prepare the Docker environment on the host.
+2. Open a shell inside the container.
+3. Build the workspace after changes.
+4. Launch the ROS 2 workflow you want to use.
+5. Validate that controllers, robot state, and camera topics are alive.
 
 In practice, that usually means:
 
 ```bash
-./run.sh build-ws
-./run.sh sim-bringup rviz:=false
+xhost +local:docker
+export DOCKER_UID="$(id -u)"
+export DOCKER_GID="$(id -g)"
+export DOCKER_USER="${USER}"
+export ROS_DISTRO=humble
+export ELEPHANT_BRANCH=humble
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY_PATH="${XAUTHORITY:-$HOME/.Xauthority}"
+export XAUTHORITY_CONTAINER=/tmp/.Xauthority
+docker compose -f docker/docker-compose.yml build
+docker compose -f docker/docker-compose.yml run --rm sim bash
 ```
 
-Then choose one of:
+Then inside the container:
 
 ```bash
-./run.sh joint-topic
-./run.sh topic-pose
-./run.sh slider
-./run.sh pick-place
+cd /workspaces/mycobot_realsense_pick_sim
+colcon build --symlink-install
+source install/setup.bash
+ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
 ```
 
-## 3. Build and Environment Commands
+From that point on, the preferred way to work is to keep using normal `ros2` commands inside the container.
 
-### `./run.sh build-image`
+The `run.sh` helper still exists for compatibility, but it is no longer the canonical documented workflow and it should not receive new wrapper commands.
+
+## 3. Docker and Environment Commands
+
+### `xhost +local:docker`
+
+Allows local Docker containers to use the host X server.
+
+Use it when:
+
+- you want Gazebo or RViz windows to open from inside the container
+- you are starting a new desktop session
+
+### Exporting the Docker Compose Variables
+
+The compose file expects the user, display, and Xauthority values to be available from the host shell.
+
+Recommended exports:
+
+```bash
+export DOCKER_UID="$(id -u)"
+export DOCKER_GID="$(id -g)"
+export DOCKER_USER="${USER}"
+export ROS_DISTRO=humble
+export ELEPHANT_BRANCH=humble
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY_PATH="${XAUTHORITY:-$HOME/.Xauthority}"
+export XAUTHORITY_CONTAINER=/tmp/.Xauthority
+```
+
+### `docker compose -f docker/docker-compose.yml build`
 
 Builds the Docker image used by the project.
 
@@ -65,18 +105,7 @@ Use it when:
 - the `docker/Dockerfile` changed
 - the base ROS or dependency stack changed
 
-### `./run.sh build-ws`
-
-Runs `colcon build --symlink-install` inside the project container.
-
-Use it when:
-
-- Python nodes changed
-- launch files changed
-- configuration files changed
-- you added a new executable
-
-### `./run.sh shell`
+### `docker compose -f docker/docker-compose.yml run --rm sim bash`
 
 Opens an interactive shell inside the configured container.
 
@@ -88,32 +117,21 @@ Use it when:
 
 ## 4. Using Standard ROS 2 Commands Inside the Container
 
-This section explains how to use normal `ros2` commands manually, without relying only on the helper script.
+This section explains the preferred way to use this repository: open the Docker container and use normal `ros2` commands directly.
 
 Important:
 
 - the standard `ros2` commands in this project are expected to run inside the Docker container
 - if you run `ros2 launch`, `ros2 run`, or `ros2 topic` directly on the host, they may fail unless you separately installed the full ROS 2 environment on the host
-- each new terminal that will use manual ROS 2 commands should start with `./run.sh shell`
-
-There are two valid ways to work with this repository:
-
-- use `./run.sh` from the host for the common workflows
-- open a shell in the container and use `ros2 launch`, `ros2 run`, `ros2 topic`, and related commands directly
-
-The helper script is the easiest path. The manual `ros2` path is useful when:
-
-- you want more control over what is running
-- you want to debug a single node
-- you want to inspect topics, actions, or services manually
-- you want to run one launch in one terminal and publish commands from another
+- each new terminal that will use ROS 2 commands should start with `docker compose -f docker/docker-compose.yml run --rm sim bash`
+- from this point forward, the documented workflow for this repository is Docker plus raw `ros2` commands, not new `run.sh` wrappers
 
 ### 4.1 Enter the Container Shell
 
 From the repository root on the host:
 
 ```bash
-./run.sh shell
+docker compose -f docker/docker-compose.yml run --rm sim bash
 ```
 
 This opens a shell inside the configured Docker container.
@@ -147,7 +165,7 @@ after a fresh build or before running manual `ros2` commands in a new terminal.
 Recommended manual workflow for any new terminal:
 
 ```bash
-./run.sh shell
+docker compose -f docker/docker-compose.yml run --rm sim bash
 cd /workspaces/mycobot_realsense_pick_sim
 source install/setup.bash
 ```
@@ -225,7 +243,7 @@ Typical pattern:
 For each extra terminal, open a new shell in the container:
 
 ```bash
-./run.sh shell
+docker compose -f docker/docker-compose.yml run --rm sim bash
 ```
 
 Then inside it:
@@ -295,24 +313,25 @@ List services:
 ros2 service list
 ```
 
-### 4.8 When To Use `./run.sh` Versus Raw `ros2`
+### 4.8 Canonical Workflow Rule
 
-Use `./run.sh` when:
+For this repository, the preferred workflow is:
 
-- you want the standard documented workflow
-- you are onboarding someone
-- you want the fastest path to bring the environment up
+- host commands with `docker compose`
+- runtime commands with `ros2 launch`, `ros2 run`, and `ros2 topic` inside the container
 
-Use raw `ros2 launch` or `ros2 run` when:
+When writing documentation or PR reproduction steps, prefer:
 
-- you are debugging
-- you want to restart only one node
-- you want to compose your own workflow manually
-- you want finer control over which nodes are running
+- `docker compose -f docker/docker-compose.yml ...`
+- `ros2 launch ...`
+- `ros2 run ...`
+- `ros2 topic ...`
+
+Do not add new `run.sh` wrapper commands for new workflows.
 
 ## 5. Main Simulation Launches
 
-### `./run.sh sim-world`
+### `ros2 launch mycobot_realsense_pick_sim sim_world.launch.py`
 
 Launches only the Gazebo world.
 
@@ -323,7 +342,7 @@ Use this when:
 
 Do not use this when you expect the arm to be controllable.
 
-### `./run.sh sim-bringup rviz:=false`
+### `ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false`
 
 Launches the main runtime stack.
 
@@ -345,7 +364,7 @@ Use this when:
 
 ## 6. Choose a Control Mode
 
-### `./run.sh joint-topic`
+### `ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py`
 
 This is the most direct and script-friendly way to move the robot.
 
@@ -360,7 +379,7 @@ Use this when:
 - you want a simple homing command
 - you want to script movements without MoveIt
 
-### `./run.sh topic-pose`
+### `ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py`
 
 This starts the Cartesian pose workflow.
 
@@ -374,7 +393,7 @@ Use this when:
 - you want MoveIt to solve IK and execute the path
 - you want a higher-level control workflow than raw joints
 
-### `./run.sh slider`
+### `ros2 launch mycobot_realsense_pick_sim slider_control_sim.launch.py`
 
 This launches the slider-based manual interface.
 
@@ -384,7 +403,7 @@ Use this when:
 - you want to manually inspect reachable joint ranges
 - you want quick human-in-the-loop tests
 
-### `./run.sh pick-place`
+### `ros2 launch mycobot_realsense_pick_sim pick_place.launch.py`
 
 This launches the higher-level manipulation flow.
 
@@ -411,7 +430,7 @@ If you send a new command while the current one is still executing, the node kee
 ### 7.1 Start the Joint Workflow
 
 ```bash
-./run.sh joint-topic
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
 ### 7.2 Send a Full Arm Goal
@@ -468,7 +487,7 @@ It computes IK with MoveIt and executes the resulting path.
 ### 8.1 Start the Pose Workflow
 
 ```bash
-./run.sh topic-pose
+ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py
 ```
 
 ### 8.2 Send a Test Cartesian Goal
@@ -494,7 +513,7 @@ The slider workflow is meant to emulate the interactive manual control experienc
 Start it with:
 
 ```bash
-./run.sh slider
+ros2 launch mycobot_realsense_pick_sim slider_control_sim.launch.py
 ```
 
 This brings up:
@@ -518,18 +537,29 @@ Control flow:
 1. Build the workspace.
 
 ```bash
-./run.sh build-ws
+docker compose -f docker/docker-compose.yml run --rm sim bash
+```
+
+Inside the container:
+
+```bash
+cd /workspaces/mycobot_realsense_pick_sim
+colcon build --symlink-install
+source install/setup.bash
 ```
 
 2. Launch the main simulation stack.
 
 ```bash
-./run.sh sim-bringup rviz:=false
+ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
 ```
 
 3. In another terminal, check the main topics.
 
 ```bash
+docker compose -f docker/docker-compose.yml run --rm sim bash
+cd /workspaces/mycobot_realsense_pick_sim
+source install/setup.bash
 ros2 topic list | grep camera
 ros2 topic echo --once /joint_states
 ```
@@ -539,7 +569,7 @@ ros2 topic echo --once /joint_states
 1. Start the joint workflow.
 
 ```bash
-./run.sh joint-topic
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
 ```
 
 2. Send a test arm configuration.
@@ -559,7 +589,7 @@ ros2 topic pub --once /arm_joint_goal sensor_msgs/msg/JointState "{name: ['joint
 1. Start the pose workflow.
 
 ```bash
-./run.sh topic-pose
+ros2 launch mycobot_realsense_pick_sim topic_pose_control.launch.py
 ```
 
 2. Send a Cartesian pose goal.
@@ -610,7 +640,7 @@ Software rendering may be active. You can try:
 
 ```bash
 export LIBGL_ALWAYS_SOFTWARE=1
-./run.sh sim-bringup rviz:=false
+ros2 launch mycobot_realsense_pick_sim sim_bringup.launch.py rviz:=false
 ```
 
 ### A Topic Command Does Not Seem To Move the Robot
