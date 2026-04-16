@@ -29,6 +29,7 @@ setup(
     entry_points={
         "console_scripts": [
             "realsense_topic_relay = mycobot_realsense_pick_sim.realsense_topic_relay:main",
+            "aruco_object_detector = mycobot_realsense_pick_sim.aruco_object_detector:main",
             "object_detector = mycobot_realsense_pick_sim.object_detector:main",
             "pick_place_executor = mycobot_realsense_pick_sim.pick_place_executor:main",
             "topic_joint_commander = mycobot_realsense_pick_sim.topic_joint_commander:main",

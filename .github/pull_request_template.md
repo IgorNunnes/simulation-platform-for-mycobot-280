@@ -32,6 +32,12 @@ Group the changes by area and explain the practical effect of each one.
 ## Simulation and Robot Model
 
 - 
+- the simulation world now places ArUco markers on top of the pickable blocks so camera-based pose estimation can target the existing object models directly
+
+## Perception
+
+- the branch now includes an ArUco-based detector node that turns RGB camera frames, camera intrinsics, and TF into world-frame object poses
+- ArUco was chosen as the current perception path because it is the safest deterministic option for the existing simulation blocks and a strong base for later pick-and-place pose estimation
 
 ## Control and Teleoperation
 
@@ -47,6 +53,7 @@ Group the changes by area and explain the practical effect of each one.
 - the manual now treats Docker plus raw `ros2 launch`, `ros2 run`, and `ros2 topic` as the canonical workflow
 - the manual makes it explicit that each terminal used for ROS 2 commands should start from `docker compose -f docker/docker-compose.yml run --rm sim bash` and `source install/setup.bash`
 - new workflow documentation should prefer Docker and ROS 2 commands directly instead of adding new `run.sh` wrappers
+- the manual now documents how to run the ArUco detector and inspect its pose-estimation outputs
 
 # How To Reproduce the Current Branch
 
@@ -103,6 +110,12 @@ Expected result:
 - ros2_control controllers are active
 - the topic joint commander is available
 - the startup hold command is sent only after the controllers are active
+
+If you want the ArUco detector active during bringup:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py aruco_detector:=true
+```
 
 ## 4. Validate Manual ROS 2 Usage Inside the Container
 
@@ -177,6 +190,28 @@ Important:
 - the `ros2 topic pub` commands above should be executed from a terminal that is already inside the container
 - for each new terminal, run `docker compose -f docker/docker-compose.yml run --rm sim bash` and `source install/setup.bash` before publishing commands
 
+## 6. Validate ArUco Pose Estimation
+
+Start the workflow with the detector enabled:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py aruco_detector:=true
+```
+
+In another terminal, inspect the detector outputs:
+
+```bash
+ros2 topic echo --once /detected_objects/json
+ros2 topic echo --once /detected_objects/poses
+ros2 topic info /detected_objects/debug_image
+```
+
+Expected result:
+
+- the simulated blocks are detected by marker ID
+- the published object names match the world models such as `red_block` and `green_block`
+- the detector publishes world-frame positions that are compatible with downstream pick-and-place logic
+
 # Validation Checklist
 
 Keep this checklist updated as the branch grows.
@@ -188,6 +223,7 @@ Keep this checklist updated as the branch grows.
 - [ ] Camera topics are available
 - [ ] Manual `ros2 launch` / `ros2 run` / `ros2 topic` workflows work inside the container
 - [ ] Joint topic control works
+- [ ] ArUco detector publishes compatible object poses
 - [ ] `MANUAL_FOR_USE.md` reflects the latest workflow
 - [ ] `README.md` remains focused on host requirements and Docker bringup
 

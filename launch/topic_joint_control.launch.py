@@ -191,6 +191,13 @@ def generate_launch_description():
     except PackageNotFoundError:
         pass
 
+    aruco_detector = Node(
+        package="mycobot_realsense_pick_sim",
+        executable="aruco_object_detector",
+        output="screen",
+        condition=IfCondition(LaunchConfiguration("aruco_detector")),
+    )
+
     commander = Node(
         package="mycobot_realsense_pick_sim",
         executable="topic_joint_commander",
@@ -232,6 +239,7 @@ def generate_launch_description():
         DeclareLaunchArgument("world", default_value=world_path),
         DeclareLaunchArgument("rviz", default_value="false"),
         DeclareLaunchArgument("image_view", default_value="false"),
+        DeclareLaunchArgument("aruco_detector", default_value="false"),
         SetEnvironmentVariable("IGN_GAZEBO_RESOURCE_PATH", gz_resource_path),
         SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", gz_resource_path),
         SetEnvironmentVariable("GAZEBO_MODEL_PATH", gz_resource_path),
@@ -248,6 +256,7 @@ def generate_launch_description():
         start_gripper_controller,
         start_runtime_nodes,
         rviz,
+        aruco_detector,
     ]
     actions.extend(image_view_action)
     return LaunchDescription(actions)

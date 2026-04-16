@@ -15,6 +15,7 @@ Use that document for:
 - step-by-step environment bringup
 - how to use standard `ros2 launch`, `ros2 run`, and `ros2 topic` commands inside the container
 - joint-space control
+- ArUco-based pose estimation for the simulated camera
 - troubleshooting and workflow examples
 
 ## Recommended Host Setup
@@ -123,4 +124,10 @@ Then launch the working joint-control workflow:
 
 ```bash
 ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py
+```
+
+If you also want the ArUco detector running:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py aruco_detector:=true
 ```

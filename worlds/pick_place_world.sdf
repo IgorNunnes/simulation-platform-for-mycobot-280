@@ -185,6 +185,27 @@
           <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
           <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material>
         </visual>
+        <visual name="marker_visual">
+          <pose>0 0 0.0206 0 0 0</pose>
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>0.036 0.036</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>aruco_marker_0.png</albedo_map>
+                <roughness>1.0</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
       </link>
     </model>
     <model name="green_block">
@@ -203,6 +224,27 @@
         <visual name="visual">
           <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
           <material><ambient>0.1 0.7 0.2 1</ambient><diffuse>0.1 0.7 0.2 1</diffuse></material>
+        </visual>
+        <visual name="marker_visual">
+          <pose>0 0 0.0206 0 0 0</pose>
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>0.036 0.036</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>aruco_marker_1.png</albedo_map>
+                <roughness>1.0</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
         </visual>
       </link>
     </model>
@@ -223,6 +265,27 @@
           <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
           <material><ambient>0.1 0.2 0.8 1</ambient><diffuse>0.1 0.2 0.8 1</diffuse></material>
         </visual>
+        <visual name="marker_visual">
+          <pose>0 0 0.0206 0 0 0</pose>
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>0.036 0.036</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>aruco_marker_2.png</albedo_map>
+                <roughness>1.0</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
       </link>
     </model>
     <model name="yellow_block">
@@ -242,6 +305,27 @@
           <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
           <material><ambient>0.85 0.75 0.1 1</ambient><diffuse>0.85 0.75 0.1 1</diffuse></material>
         </visual>
+        <visual name="marker_visual">
+          <pose>0 0 0.0206 0 0 0</pose>
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>0.036 0.036</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>aruco_marker_3.png</albedo_map>
+                <roughness>1.0</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
       </link>
     </model>
     <model name="orange_block">
@@ -260,6 +344,27 @@
         <visual name="visual">
           <geometry><box><size>0.04 0.04 0.04</size></box></geometry>
           <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.9 0.45 0.1 1</diffuse></material>
+        </visual>
+        <visual name="marker_visual">
+          <pose>0 0 0.0206 0 0 0</pose>
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>0.036 0.036</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <pbr>
+              <metal>
+                <albedo_map>aruco_marker_4.png</albedo_map>
+                <roughness>1.0</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
         </visual>
       </link>
     </model>

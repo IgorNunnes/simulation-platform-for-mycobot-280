@@ -197,6 +197,12 @@ The most useful signs in the launch terminal are:
 
 If you publish a joint goal too early, the startup sequence may still be activating controllers or sending the initial hold command.
 
+You can also enable the ArUco detector directly in the same launcher:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py aruco_detector:=true
+```
+
 ### 4.4 Open More Than One Terminal
 
 For most ROS 2 workflows, you should use more than one terminal.
@@ -262,6 +268,66 @@ List services:
 
 ```bash
 ros2 service list
+```
+
+### 4.6 ArUco Pose Estimation
+
+The current perception path uses single ArUco markers because it is the safest fit for this branch:
+
+- it is deterministic
+- it does not depend on color thresholds or learned models
+- it gives a direct pose estimate from the RGB image plus camera intrinsics
+- it already matches the current simulated blocks one-to-one
+
+For future real-hardware calibration work, a ChArUco board is still a good complementary tool, but the object-detection path documented here is based on ArUco markers on the pickable objects.
+
+The repository now includes a dedicated ArUco detector node:
+
+```bash
+ros2 run mycobot_realsense_pick_sim aruco_object_detector
+```
+
+In the supported workflow, the easiest way to use it is through the main launcher:
+
+```bash
+ros2 launch mycobot_realsense_pick_sim topic_joint_control.launch.py aruco_detector:=true
+```
+
+This detector uses:
+
+- `/camera/color/image_raw`
+- `/camera/color/camera_info`
+- the TF from `camera_color_optical_frame` to `world`
+
+It publishes:
+
+- `/detected_objects/poses`
+- `/detected_objects/markers`
+- `/detected_objects/json`
+- `/detected_objects/debug_image`
+
+The detector is configured for the current simulation world with these default marker mappings:
+
+- marker `0` -> `red_block`
+- marker `1` -> `green_block`
+- marker `2` -> `blue_block`
+- marker `3` -> `yellow_block`
+- marker `4` -> `orange_block`
+
+The simulated blocks now include ArUco markers on their top faces so the detector can estimate their pose from the RGB camera image.
+
+Useful checks:
+
+```bash
+ros2 topic echo --once /detected_objects/json
+ros2 topic echo --once /detected_objects/poses
+ros2 topic info /detected_objects/debug_image
+```
+
+If you want to visualize the debug image:
+
+```bash
+ros2 run image_view image_view --ros-args -r image:=/detected_objects/debug_image
 ```
 
 ## 5. Joint-Space Control
